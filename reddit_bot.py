@@ -2,6 +2,7 @@ import praw
 import config
 import time
 import os
+import requests
 
 def bot_login():
 	print("Logging in...")
@@ -10,7 +11,7 @@ def bot_login():
 			password = config.password,
 			client_id = config.client_id,
 			client_secret = config.client_secret,
-			user_agent = "lacetrim's dog comment responder v0.1")
+			user_agent = "lacetrim's joke comment responder v0.1")
 
 	print("Logged in!")
 
@@ -20,11 +21,18 @@ def run_bot(r):
 	print("Obtaining 25 comments...")
 
 	for comment in r.subreddit('test').comments(limit=25):
-		if "dog" in comment.body and comment.id not in comments_replied_to and comment.author != r.user.me():
-			print("String with 'dog' found in comment " + comment.id)
+		if "!joke" in comment.body and comment.id not in comments_replied_to and comment.author != r.user.me():
+			print("String with '!joke' found in comment " + comment.id)
 
-			comment.reply("I also love dogs! [Here](https://i.imgur.com/W2XqgxI.gifv)"
-			 + " is a cute gif of one")
+			comment_reply = "You requested a Chuck Norris joke! Here it is:\n\n"
+
+			joke = requests.get('http://api.icndb.com/jokes/random').json()['value']['joke']
+
+			comment_reply += ">" + joke
+
+			comment_reply += "\n\nThis joke came from [ICNDB.com](http://icndb.com)"
+
+			comment.reply(comment_reply)
 
 			print("Replied to comment " + comment.id)
 
