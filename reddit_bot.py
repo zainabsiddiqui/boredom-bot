@@ -30,7 +30,8 @@ def run_bot(r):
 
 			comments_replied_to.append(comment.id)
 
-	print(comments_replied_to)
+			with open("comments_replied_to.txt", "a") as f:
+				f.write(comment.id + "\n")
 
 	print("Sleeping for 10 seconds...")
 	#Sleep for 10 seconds...
@@ -43,6 +44,8 @@ def get_saved_comments():
 		with open("comments_replied_to.txt", "r") as f:
 			comments_replied_to = f.read()
 			comments_replied_to = comments_replied_to.split("\n")
+			comments_replied_to = list(filter(None, comments_replied_to))
+			
 	return comments_replied_to
 
 r = bot_login()
