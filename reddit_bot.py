@@ -26,14 +26,15 @@ def run_bot(r):
 	for comment in r.subreddit('test').comments(limit=25):
 
 		#If the comment contains a statement of boredom ("I'm bored" or "I am bored"), reply back with a random suggestion
-		if ("I'm bored" in comment.body or "I am bored" in comment.body or "!boredombot" in comment.body) and (comment.id not in comments_replied_to) and (comment.author != r.user.me()):
+		if ("I'm bored" in comment.body or "I am bored" in comment.body) and (comment.id not in comments_replied_to) and (comment.author != r.user.me()):
 
 			print("String with boredom found in comment " + comment.id)
 
 			#Append boilerplate comment with random suggestion
 			comment_reply = "Oh no, there's so much you can do! Here's an idea: "
 			suggestion = requests.get('http://www.boredapi.com/api/activity/').json()['activity']
-			comment_reply += suggestion + ".\n\n^(Beep, boop. I am a bot. Comment '!boredombot 3' - or any other number - to get suggestions tailored for that number of participants.)"
+			comment_reply += suggestion + ".\n&nbsp;\n\n^(Beep, boop. I am a bot. Filter my suggestions by type of activity by commenting back"
+			+ "with !boredombot 'type', where type can be music, education, cooking, social, relaxation, busywork, charity, recreational, or diy. The possibilities are endless!)"
 
 			#Reply to the comment
 			comment.reply(comment_reply)
@@ -47,22 +48,35 @@ def run_bot(r):
 
 		elif "!boredombot" in comment.body and comment.id not in comments_replied_to and comment.author != r.user.me():
 
-				number_of_participants = comment.strip()[-1]
+				#Grab type parameter from comment
+				boredom_type = comment.body.rsplit(None, 1)[-1]
+				print("Found type: " + boredom_type)
 
-				if number_of_participants >= 1:
-					participant_reply = "Here's an idea to pass the time with " + number_of_participants + " people: "
+				#Check if type parameter is valid
+				if boredom_type in ('music', 'education', 'cooking', 'social', 'relaxation', 'busywork', 'charity', 'recreational', 'diy'):
+
+					#Build the requests URL based on type
+					comment_reply = "Fun! Here's a(n) " + boredom_type + " suggestion: "
+					boredom_type_suggestion = requests.get("http://www.boredapi.com/api/activity?type=" + boredom_type).json()['activity']
+					comment_reply += boredom_type_suggestion + "."
 
 				else:
-					participant_reply = "Uh oh! That's not a valid number of participants."
 
-				participant_url = "http://www.boredapi.com/api/activity?participants=" + number_of_participants
+					#Error message if type is invalid
+					comment_reply = "Oops, that's not a valid type/category! Valid types are music, education, cooking, social, relaxation, busywork, charity, recreational, or diy."
 
-				suggestion = requests.get(participant_url).
+				#Reply to the comment
+				comment.reply(comment_reply)
+				print("Replied to comment " + comment.id)
 
-				comment.reply(participant_reply)
+				#Add commment id to .txt file so that we don't reply to it again
+				comments_replied_to.append(comment.id)
 
-	print("Sleeping for 10 seconds...")
+				with open("comments_replied_to.txt", "a") as f:
+					f.write(comment.id + "\n")
+
 	#Sleep for 10 seconds...
+	print("Sleeping for 10 seconds...")
 	time.sleep(10)
 
 def get_saved_comments():
