@@ -21,16 +21,16 @@ def run_bot(r):
 	print("Obtaining 25 comments...")
 
 	for comment in r.subreddit('test').comments(limit=25):
-		if "!joke" in comment.body and comment.id not in comments_replied_to and comment.author != r.user.me():
-			print("String with '!joke' found in comment " + comment.id)
+		if ("I'm bored" in comment.body or "I am bored" in comment.body) and (comment.id not in comments_replied_to) and (comment.author != r.user.me()):
+			print("String with boredom found in comment " + comment.id)
 
-			comment_reply = "You requested a Chuck Norris joke! Here it is:\n\n"
+			comment_reply = "Oh no, there's so much you can do! Here's an idea: "
 
-			joke = requests.get('http://api.icndb.com/jokes/random').json()['value']['joke']
+			suggestion = requests.get('http://www.boredapi.com/api/activity/').json()['activity']
 
-			comment_reply += ">" + joke
+			comment_reply += suggestion + ".\n\n^(Beep, boop. I am a bot. Comment '!boredombot 3' - or any other number - to get suggestions tailored for that number of recipients.)"
 
-			comment_reply += "\n\nThis joke came from [ICNDB.com](http://icndb.com)"
+			# comment_reply += "\n\nThis joke came from [ICNDB.com](http://icndb.com)"
 
 			comment.reply(comment_reply)
 
